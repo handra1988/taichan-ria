@@ -2,205 +2,873 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover">
+    <meta name="theme-color" content="#212529">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Kasir Taichan">
+    <meta name="description" content="Aplikasi kasir mobile untuk Taichan Ria">
     <title>Kasir Taichan Ria</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        :root { --dark: #212529; --danger: #dc3545; --success: #198754; --bg: #f8f9fa; }
-        body { background-color: var(--bg); font-family: -apple-system, sans-serif; padding-top: 75px; padding-bottom: 40px; }
-        .header-ui { position: fixed; top: 0; left: 0; right: 0; background: #fff; z-index: 1000; padding: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
-        .container { max-width: 480px; }
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .menu-btn { background: #fff; border: 1px solid #dee2e6; border-radius: 14px; padding: 15px 8px; text-align: center; transition: 0.1s; user-select: none; -webkit-tap-highlight-color: transparent; border-bottom: 3px solid #ddd; }
-        .menu-btn:active { background-color: #e9ecef; transform: translateY(2px); border-bottom-width: 1px; }
-        .menu-name { display: block; font-weight: 700; font-size: 14px; color: #333; }
-        .menu-price { display: block; color: var(--danger); font-size: 12px; font-weight: 600; }
-        .qty-box { background: #fff; border-radius: 12px; padding: 10px; border: 1px solid #dee2e6; margin-bottom: 15px; }
-        .nav-pills { background: #eee; border-radius: 12px; padding: 4px; margin: 20px 0; }
-        .nav-pills .nav-link.active { background-color: var(--dark); color: #fff; }
-        .card-report { background: #fff; border-radius: 16px; padding: 15px; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        #status { font-size: 11px; height: 16px; font-weight: 600; color: var(--success); }
+        * {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-font-smoothing: antialiased;
+            -webkit-tap-highlight-color: transparent;
+        }
+        input, textarea {
+            -webkit-user-select: text;
+            user-select: text;
+        }
+
+        :root {
+            --dark: #212529;
+            --danger: #dc3545;
+            --success: #198754;
+            --warning: #ffc107;
+            --info: #0dcaf0;
+            --bg: #f8f9fa;
+            --border: #dee2e6;
+            --shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        body {
+            background-color: var(--bg);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding-top: 75px;
+            padding-bottom: 60px;
+            font-size: 16px;
+            -webkit-user-select: none;
+        }
+
+        .header-ui {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #fff;
+            z-index: 1000;
+            padding: max(12px, env(safe-area-inset-top));
+            box-shadow: var(--shadow);
+            padding-bottom: 12px;
+        }
+
+        .header-ui .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title {
+            flex: 1;
+        }
+
+        .header-title h6 {
+            font-weight: 700;
+            margin: 0;
+            text-transform: uppercase;
+            font-size: 16px;
+            color: var(--dark);
+        }
+
+        #status {
+            font-size: 11px;
+            height: 16px;
+            font-weight: 600;
+            color: var(--success);
+            min-height: 16px;
+            display: block;
+        }
+
+        #quickTotal {
+            font-weight: 700;
+            font-size: 20px;
+            color: var(--success);
+            min-width: 80px;
+            text-align: right;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 0 12px;
+        }
+
+        .qty-box {
+            background: #fff;
+            border-radius: 12px;
+            padding: 12px;
+            border: 1px solid var(--border);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .qty-box label {
+            font-weight: 700;
+            font-size: 12px;
+            color: #999;
+            text-transform: uppercase;
+            margin: 0;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        #inputQty {
+            font-size: 18px !important;
+            font-weight: 700 !important;
+            text-align: center !important;
+            border: 1px solid var(--border) !important;
+            border-radius: 8px !important;
+            padding: 10px !important;
+            flex: 1;
+            max-width: 100px;
+            -webkit-appearance: textfield;
+        }
+
+        #inputQty::-webkit-outer-spin-button,
+        #inputQty::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .menu-btn {
+            background: #fff;
+            border: 1.5px solid var(--border);
+            border-radius: 14px;
+            padding: 14px 10px;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 90px;
+            position: relative;
+            overflow: hidden;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .menu-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.03);
+            opacity: 0;
+            transition: opacity 0.15s;
+        }
+
+        .menu-btn:active {
+            background-color: #e9ecef;
+            transform: translateY(1px) scale(0.98);
+            border-color: #bbb;
+        }
+
+        .menu-btn:active::before {
+            opacity: 1;
+        }
+
+        .menu-btn.w-100 {
+            grid-column: span 2;
+        }
+
+        .menu-btn.processing {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .menu-name {
+            display: block;
+            font-weight: 700;
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .menu-price {
+            display: block;
+            color: var(--danger);
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .menu-qty-badge {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: var(--danger);
+            color: #fff;
+            border-radius: 10px;
+            min-width: 20px;
+            height: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .menu-btn.has-items .menu-qty-badge {
+            opacity: 1;
+        }
+
+        .nav-pills {
+            background: #eee;
+            border-radius: 12px;
+            padding: 4px;
+            margin: 20px 0;
+            display: flex;
+            gap: 4px;
+        }
+
+        .nav-link {
+            flex: 1;
+            background: transparent;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 12px;
+            font-weight: 600;
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .nav-link:active {
+            background: rgba(0,0,0,0.1);
+        }
+
+        .nav-link.active {
+            background-color: var(--dark);
+            color: #fff;
+        }
+
+        .card-report {
+            background: #fff;
+            border-radius: 16px;
+            padding: 15px;
+            display: none;
+            box-shadow: var(--shadow);
+            margin-bottom: 15px;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card-report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-report-header span:first-child {
+            font-size: 12px;
+            font-weight: 700;
+            color: #999;
+            text-transform: uppercase;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:active {
+            color: #333;
+        }
+
+        .table {
+            margin-bottom: 0;
+            font-size: 13px;
+        }
+
+        .table td {
+            padding: 8px 4px;
+            vertical-align: middle;
+        }
+
+        .table tbody tr {
+            border-bottom: 1px solid var(--border);
+        }
+
+        .table tfoot tr {
+            background: #f8f9fa;
+            font-weight: 700;
+            border-top: 2px solid var(--border);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 30px 15px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #e0e0e0;
+            border-top: 2px solid var(--dark);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .undo-toast {
+            position: fixed;
+            bottom: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--dark);
+            color: #fff;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 999;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .undo-btn {
+            background: var(--success);
+            border: none;
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .undo-btn:active {
+            background: #0d6633;
+        }
+
+        /* iOS Safari specific fixes */
+        @supports (padding: max(0px)) {
+            body {
+                padding-bottom: max(60px, env(safe-area-inset-bottom));
+            }
+            
+            .header-ui {
+                padding-right: max(12px, env(safe-area-inset-right));
+                padding-left: max(12px, env(safe-area-inset-left));
+            }
+        }
+
+        /* Haptic feedback simulation */
+        @media (prefers-reduced-motion: no-preference) {
+            .menu-btn {
+                transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+        }
+
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #1a1a1a;
+            }
+            
+            .menu-btn, .qty-box, .card-report, .header-ui {
+                background: #2d2d2d;
+                border-color: #444;
+                color: #fff;
+            }
+
+            .menu-name {
+                color: #e0e0e0;
+            }
+
+            .nav-pills {
+                background: #333;
+            }
+        }
+
+        /* Reduce motion */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
     </style>
 </head>
 <body>
 
     <div class="header-ui">
-        <div class="container d-flex justify-content-between align-items-center">
-            <div>
-                <h6 class="fw-bold m-0 text-uppercase">Taichan Ria</h6>
+        <div class="container">
+            <div class="header-title">
+                <h6>Taichan Ria</h6>
                 <div id="status"></div>
             </div>
-            <div id="quickTotal" class="fw-bold text-success fs-5">Rp 0</div>
+            <div id="quickTotal">Rp 0</div>
         </div>
     </div>
 
     <div class="container">
-        <div class="qty-box d-flex align-items-center">
-            <span class="small fw-bold text-muted me-3">JUMLAH:</span>
-            <input type="number" id="inputQty" class="form-control form-control-lg text-center fw-bold border-0 bg-light" value="1" min="1">
+        <div class="qty-box">
+            <label for="inputQty">JUMLAH:</label>
+            <input type="number" id="inputQty" inputmode="numeric" value="1" min="1" max="99" title="Jumlah item yang ingin ditambahkan">
         </div>
 
-        <div class="menu-grid">
-            <button class="menu-btn" onclick="handleOrder('Paket I', 18000)"><span class="menu-name">Paket I</span><span class="menu-price">18k</span></button>
-            <button class="menu-btn" onclick="handleOrder('Paket II', 30000)"><span class="menu-name">Paket II</span><span class="menu-price">30k</span></button>
-            <button class="menu-btn" onclick="handleOrder('Paket III', 24000)"><span class="menu-name">Paket III</span><span class="menu-price">24k</span></button>
-            <button class="menu-btn" onclick="handleOrder('Extra Sambal', 3000)"><span class="menu-name">Sambal</span><span class="menu-price">3k</span></button>
-            <button class="menu-btn" onclick="handleOrder('Extra Lontong', 3000)"><span class="menu-name">Lontong</span><span class="menu-price">3k</span></button>
-            <button class="menu-btn" onclick="handleOrder('Sosis Solo', 3000)"><span class="menu-name">Sosis Solo</span><span class="menu-price">3k</span></button>
-            <button class="menu-btn" onclick="handleOrder('Per tusuk Ayam/Kulit', 3000)"><span class="menu-name">Ayam/Kulit</span><span class="menu-price">3k</span></button>
-            <button class="menu-btn" onclick="handleOrder('Per tusuk Crispy', 4000)"><span class="menu-name">Crispy</span><span class="menu-price">4k</span></button>
-            <button class="menu-btn w-100" style="grid-column: span 2;" onclick="handleOrder('Riso Mayo', 3000)"><span class="menu-name">Riso Mayo</span><span class="menu-price">3k</span></button>
-        </div>
+        <div class="menu-grid" id="menuGrid"></div>
 
-        <nav class="nav nav-pills nav-fill">
-            <button id="btn-daily" class="nav-link" onclick="toggleView('daily')">HARIAN</button>
-            <button id="btn-monthly" class="nav-link" onclick="toggleView('monthly')">BULANAN</button>
+        <nav class="nav-pills">
+            <button class="nav-link" data-view="daily">HARIAN</button>
+            <button class="nav-link" data-view="monthly">BULANAN</button>
         </nav>
 
         <div id="dailyReport" class="card-report">
-            <div class="d-flex justify-content-between mb-2 small fw-bold text-muted text-uppercase">
-                <span>Rincian Hari Ini</span><span onclick="hideReport()" style="cursor:pointer">Tutup ✕</span>
+            <div class="card-report-header">
+                <span>Rincian Hari Ini</span>
+                <button class="close-btn" data-close="daily" title="Tutup laporan harian">✕</button>
             </div>
             <div id="dailyContent"></div>
         </div>
 
         <div id="monthlyReport" class="card-report">
-            <div class="d-flex justify-content-between mb-2 small fw-bold text-muted text-uppercase">
-                <span>Rekap Bulanan</span><span onclick="hideReport()" style="cursor:pointer">Tutup ✕</span>
+            <div class="card-report-header">
+                <span>Rekap Bulanan</span>
+                <button class="close-btn" data-close="monthly" title="Tutup laporan bulanan">✕</button>
             </div>
             <div id="monthlyContent"></div>
         </div>
     </div>
 
+    <div id="undoToast" class="undo-toast" style="display: none;">
+        <span id="undoMessage"></span>
+        <button class="undo-btn">BATALKAN</button>
+    </div>
+
     <script>
-        // --- KONFIGURASI ---
-        const FIREBASE_BASE_URL = "https://taichan-ria-default-rtdb.asia-southeast1.firebasedatabase.app/";
-        const FIREBASE_URL = FIREBASE_BASE_URL + "penjualan.json";
-        
-        let isProcessing = false;
-        let currentTab = null;
+        // ==================== KONFIGURASI ====================
+        const CONFIG = {
+            FIREBASE_BASE_URL: "https://taichan-ria-default-rtdb.asia-southeast1.firebasedatabase.app/",
+            CACHE_DURATION: 30000, // 30 detik
+            UNDO_TIMEOUT: 5000,
+            MENU_ITEMS: [
+                { name: 'Paket I', price: 18000, display: 'Paket I', priceDisplay: '18k' },
+                { name: 'Paket II', price: 30000, display: 'Paket II', priceDisplay: '30k' },
+                { name: 'Paket III', price: 24000, display: 'Paket III', priceDisplay: '24k' },
+                { name: 'Extra Sambal', price: 3000, display: 'Sambal', priceDisplay: '3k' },
+                { name: 'Extra Lontong', price: 3000, display: 'Lontong', priceDisplay: '3k' },
+                { name: 'Sosis Solo', price: 3000, display: 'Sosis Solo', priceDisplay: '3k' },
+                { name: 'Per tusuk Ayam/Kulit', price: 3000, display: 'Ayam/Kulit', priceDisplay: '3k' },
+                { name: 'Per tusuk Crispy', price: 4000, display: 'Crispy', priceDisplay: '4k' },
+                { name: 'Riso Mayo', price: 3000, display: 'Riso Mayo', priceDisplay: '3k' }
+            ]
+        };
 
-        window.onload = refreshData;
+        // ==================== STATE ====================
+        let state = {
+            isProcessing: false,
+            currentTab: null,
+            cachedData: null,
+            cacheTime: 0,
+            lastOrder: null,
+            undoTimeout: null,
+            sessionOrders: {}
+        };
 
+        // ==================== INITIALIZATION ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeMenuGrid();
+            attachEventListeners();
+            refreshData();
+            
+            // Periodic refresh
+            setInterval(refreshData, CONFIG.CACHE_DURATION);
+        });
+
+        // ==================== MENU GRID ====================
+        function initializeMenuGrid() {
+            const grid = document.getElementById('menuGrid');
+            grid.innerHTML = '';
+
+            CONFIG.MENU_ITEMS.forEach((item, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'menu-btn' + (index === CONFIG.MENU_ITEMS.length - 1 ? ' w-100' : '');
+                btn.setAttribute('data-menu-name', item.name);
+                btn.setAttribute('data-menu-price', item.price);
+                btn.setAttribute('title', `${item.display} - Rp ${item.price.toLocaleString('id-ID')}`);
+                
+                btn.innerHTML = `
+                    <div class="menu-qty-badge" id="badge-${index}">0</div>
+                    <span class="menu-name">${item.display}</span>
+                    <span class="menu-price">${item.priceDisplay}</span>
+                `;
+
+                grid.appendChild(btn);
+            });
+        }
+
+        // ==================== EVENT LISTENERS ====================
+        function attachEventListeners() {
+            // Menu buttons
+            document.addEventListener('click', (e) => {
+                const menuBtn = e.target.closest('.menu-btn');
+                if (menuBtn) {
+                    const name = menuBtn.getAttribute('data-menu-name');
+                    const price = parseInt(menuBtn.getAttribute('data-menu-price'));
+                    handleOrder(name, price);
+                }
+
+                // Close buttons
+                const closeBtn = e.target.closest('.close-btn');
+                if (closeBtn) {
+                    hideReport();
+                }
+
+                // Nav links
+                const navLink = e.target.closest('.nav-link');
+                if (navLink) {
+                    const viewType = navLink.getAttribute('data-view');
+                    toggleView(viewType);
+                }
+
+                // Undo button
+                if (e.target.closest('.undo-btn')) {
+                    undoLastOrder();
+                }
+            });
+
+            // Quantity input
+            const qtyInput = document.getElementById('inputQty');
+            qtyInput.addEventListener('input', (e) => {
+                let value = parseInt(e.target.value) || 1;
+                if (value < 1) e.target.value = 1;
+                if (value > 99) e.target.value = 99;
+            });
+
+            // Prevent pull-to-refresh on some browsers
+            document.addEventListener('touchmove', (e) => {
+                if (e.target.closest('#inputQty')) return;
+            }, { passive: true });
+        }
+
+        // ==================== FIREBASE OPERATIONS ====================
         async function refreshData() {
             try {
-                const res = await fetch(FIREBASE_URL);
+                const now = Date.now();
+                if (state.cachedData && now - state.cacheTime < CONFIG.CACHE_DURATION) {
+                    return state.cachedData;
+                }
+
+                const FIREBASE_URL = CONFIG.FIREBASE_BASE_URL + "penjualan.json";
+                const res = await fetch(FIREBASE_URL, { 
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' }
+                });
+
+                if (!res.ok) throw new Error(`Firebase error: ${res.status}`);
+
                 const data = await res.json();
                 const hariIni = new Date().toDateString();
                 let totalHariIni = 0;
                 const rincian = {};
 
-                if (data) {
+                if (data && typeof data === 'object') {
                     Object.values(data).forEach(item => {
-                        if (new Date(item.tanggal).toDateString() === hariIni) {
-                            totalHariIni += item.harga;
-                            if (!rincian[item.menu]) rincian[item.menu] = { qty: 0, subtotal: 0 };
-                            rincian[item.menu].qty++;
-                            rincian[item.menu].subtotal += item.harga;
+                        if (item && item.tanggal && item.menu && item.harga) {
+                            if (new Date(item.tanggal).toDateString() === hariIni) {
+                                totalHariIni += item.harga;
+                                if (!rincian[item.menu]) rincian[item.menu] = { qty: 0, subtotal: 0 };
+                                rincian[item.menu].qty++;
+                                rincian[item.menu].subtotal += item.harga;
+                            }
                         }
                     });
                 }
 
+                state.cachedData = { rincian, totalHariIni, raw: data };
+                state.cacheTime = now;
+                
                 document.getElementById('quickTotal').innerText = "Rp " + totalHariIni.toLocaleString('id-ID');
-                return { rincian, totalHariIni, raw: data };
+                updateMenuBadges(rincian);
+
+                return state.cachedData;
             } catch (e) {
-                console.error("Gagal ambil data", e);
+                console.error("Gagal ambil data:", e);
+                showStatus("❌ Gagal koneksi", 'danger');
                 return { rincian: {}, totalHariIni: 0, raw: null };
             }
         }
 
+        // ==================== ORDER HANDLING ====================
         async function handleOrder(name, harga) {
-            if (isProcessing) return;
-            isProcessing = true;
+            if (state.isProcessing) return;
             
             const qtyInput = document.getElementById('inputQty');
-            const qty = parseInt(qtyInput.value) || 1;
+            const qty = Math.max(1, Math.min(parseInt(qtyInput.value) || 1, 99));
             
-            document.getElementById('status').innerText = `Mencatat ${qty}x ${name}...`;
+            state.isProcessing = true;
+            showStatus(`Mencatat ${qty}x ${name}...`);
 
             try {
+                const FIREBASE_URL = CONFIG.FIREBASE_BASE_URL + "penjualan.json";
+                const orderIds = [];
+
                 for (let i = 0; i < qty; i++) {
-                    await fetch(FIREBASE_URL, {
+                    const res = await fetch(FIREBASE_URL, {
                         method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             tanggal: new Date().toISOString(),
                             menu: name,
                             harga: harga
                         })
                     });
+
+                    if (!res.ok) throw new Error(`Firebase error: ${res.status}`);
+                    
+                    const result = await res.json();
+                    if (result.name) orderIds.push(result.name);
                 }
-                
-                document.getElementById('status').innerText = `✅ Berhasil: ${qty}x ${name}`;
+
+                // Save to session for undo
+                state.lastOrder = {
+                    name: name,
+                    qty: qty,
+                    price: harga,
+                    ids: orderIds,
+                    timestamp: Date.now()
+                };
+
+                showStatus(`✅ Berhasil: ${qty}x ${name}`, 'success');
                 qtyInput.value = 1;
+                
+                // Invalidate cache
+                state.cachedData = null;
                 await refreshData();
-                if (currentTab === 'daily') loadDaily();
+                
+                if (state.currentTab === 'daily') {
+                    await loadDaily();
+                }
+
+                showUndoToast(name, qty);
+
             } catch (e) {
-                document.getElementById('status').innerText = "❌ Gagal koneksi";
+                console.error("Error:", e);
+                showStatus("❌ Gagal koneksi", 'danger');
             } finally {
-                isProcessing = false;
-                setTimeout(() => document.getElementById('status').innerText = "", 2000);
+                state.isProcessing = false;
+                setTimeout(() => clearStatus(), 2000);
             }
         }
 
+        async function undoLastOrder() {
+            if (!state.lastOrder) return;
+
+            const { name, qty, ids } = state.lastOrder;
+            const FIREBASE_URL = CONFIG.FIREBASE_BASE_URL + "penjualan.json";
+
+            try {
+                for (const id of ids) {
+                    await fetch(`${FIREBASE_URL.replace('/penjualan.json', '')}/penjualan/${id}.json`, {
+                        method: 'DELETE'
+                    });
+                }
+
+                showStatus(`↩️ Dibatalkan: ${qty}x ${name}`, 'warning');
+                state.lastOrder = null;
+                hideUndoToast();
+                
+                state.cachedData = null;
+                await refreshData();
+                
+                if (state.currentTab === 'daily') {
+                    await loadDaily();
+                }
+
+                setTimeout(() => clearStatus(), 2000);
+            } catch (e) {
+                console.error("Undo error:", e);
+                showStatus("❌ Gagal batalkan", 'danger');
+            }
+        }
+
+        // ==================== REPORTING ====================
         async function loadDaily() {
-            document.getElementById('dailyContent').innerHTML = '<div class="text-center p-3 small text-muted">Memuat...</div>';
+            const content = document.getElementById('dailyContent');
+            content.innerHTML = '<div class="empty-state"><span class="loading-spinner"></span>Memuat...</div>';
+            
             const { rincian, totalHariIni } = await refreshData();
             
             if (Object.keys(rincian).length === 0) {
-                document.getElementById('dailyContent').innerHTML = '<div class="text-center p-3 small">Belum ada transaksi hari ini.</div>';
+                content.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📋</div><div>Belum ada transaksi hari ini</div></div>';
                 return;
             }
 
-            let html = `<table class="table table-sm small mb-0"><tbody>`;
-            Object.keys(rincian).forEach(k => {
-                html += `<tr><td>${k}</td><td class="text-center">${rincian[k].qty}x</td><td class="text-end fw-bold">${rincian[k].subtotal/1000}k</td></tr>`;
+            let html = '<table class="table"><tbody>';
+            Object.keys(rincian).sort().forEach(k => {
+                const item = rincian[k];
+                html += `<tr><td>${k}</td><td class="text-center">${item.qty}x</td><td class="text-end fw-bold">Rp ${(item.subtotal/1000).toLocaleString('id-ID')}k</td></tr>`;
             });
-            html += `</tbody><tfoot><tr class="fw-bold"><td colspan="2">TOTAL</td><td class="text-end text-success">Rp ${totalHariIni.toLocaleString('id-ID')}</td></tr></tfoot></table>`;
-            document.getElementById('dailyContent').innerHTML = html;
+            html += `</tbody><tfoot><tr><td colspan="2">TOTAL</td><td class="text-end fw-bold text-success">Rp ${totalHariIni.toLocaleString('id-ID')}</td></tr></tfoot></table>`;
+            content.innerHTML = html;
         }
 
         async function loadMonthly() {
-            document.getElementById('monthlyContent').innerHTML = '<div class="text-center p-3 small text-muted">Memuat...</div>';
+            const content = document.getElementById('monthlyContent');
+            content.innerHTML = '<div class="empty-state"><span class="loading-spinner"></span>Memuat...</div>';
+            
             const { raw } = await refreshData();
             const rekap = {};
             const listBulan = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
 
-            if (!raw) {
-                document.getElementById('monthlyContent').innerHTML = '<div class="text-center p-3 small">Data kosong.</div>';
+            if (!raw || Object.keys(raw).length === 0) {
+                content.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📊</div><div>Data kosong</div></div>';
                 return;
             }
 
             Object.values(raw).forEach(item => {
-                const d = new Date(item.tanggal);
-                const key = `${listBulan[d.getMonth()]} ${d.getFullYear()}`;
-                rekap[key] = (rekap[key] || 0) + item.harga;
+                if (item && item.tanggal && item.harga) {
+                    const d = new Date(item.tanggal);
+                    const key = `${listBulan[d.getMonth()]} ${d.getFullYear()}`;
+                    rekap[key] = (rekap[key] || 0) + item.harga;
+                }
             });
 
-            let html = `<table class="table table-sm small mb-0"><tbody>`;
-            Object.keys(rekap).reverse().forEach(k => {
+            let html = '<table class="table"><tbody>';
+            Object.keys(rekap).sort().reverse().forEach(k => {
                 html += `<tr><td>${k}</td><td class="text-end fw-bold text-success">Rp ${rekap[k].toLocaleString('id-ID')}</td></tr>`;
             });
-            html += `</tbody></table>`;
-            document.getElementById('monthlyContent').innerHTML = html;
+            html += '</tbody></table>';
+            content.innerHTML = html;
         }
 
+        // ==================== UI HELPERS ====================
         function toggleView(type) {
-            if (currentTab === type) return hideReport();
-            currentTab = type;
+            if (state.currentTab === type) return hideReport();
+            
+            state.currentTab = type;
             document.querySelectorAll('.card-report').forEach(el => el.style.display = 'none');
             document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
             
-            document.getElementById(type + 'Report').style.display = 'block';
-            document.getElementById('btn-' + type).classList.add('active');
+            const reportId = type === 'daily' ? 'dailyReport' : 'monthlyReport';
+            const btnId = `btn-${type}`;
             
-            if (type === 'daily') loadDaily(); else loadMonthly();
-            setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 200);
+            document.getElementById(reportId).style.display = 'block';
+            document.querySelector(`[data-view="${type}"]`).classList.add('active');
+            
+            if (type === 'daily') loadDaily(); 
+            else loadMonthly();
+            
+            setTimeout(() => {
+                document.querySelector('.card-report[style*="block"]')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
         }
 
         function hideReport() {
             document.querySelectorAll('.card-report').forEach(el => el.style.display = 'none');
             document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
-            currentTab = null;
+            state.currentTab = null;
+        }
+
+        function showStatus(message, type = 'success') {
+            const el = document.getElementById('status');
+            el.innerText = message;
+            el.className = type;
+        }
+
+        function clearStatus() {
+            document.getElementById('status').innerText = '';
+        }
+
+        function showUndoToast(name, qty) {
+            clearTimeout(state.undoTimeout);
+            const toast = document.getElementById('undoToast');
+            document.getElementById('undoMessage').innerText = `${qty}x ${name} dicatat`;
+            toast.style.display = 'flex';
+
+            state.undoTimeout = setTimeout(() => {
+                hideUndoToast();
+            }, CONFIG.UNDO_TIMEOUT);
+        }
+
+        function hideUndoToast() {
+            document.getElementById('undoToast').style.display = 'none';
+            clearTimeout(state.undoTimeout);
+        }
+
+        function updateMenuBadges(rincian) {
+            CONFIG.MENU_ITEMS.forEach((item, index) => {
+                const badge = document.getElementById(`badge-${index}`);
+                const btn = document.querySelector(`[data-menu-name="${item.name}"]`);
+                const count = rincian[item.name]?.qty || 0;
+
+                if (badge) badge.innerText = count;
+                if (btn) {
+                    if (count > 0) {
+                        btn.classList.add('has-items');
+                    } else {
+                        btn.classList.remove('has-items');
+                    }
+                }
+            });
         }
     </script>
 </body>
