@@ -345,6 +345,29 @@
             border-top: 2px solid var(--border);
         }
 
+        .delete-btn {
+            background: none;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            font-size: 16px;
+            padding: 4px 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            opacity: 0.6;
+        }
+
+        .delete-btn:active {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .table tbody tr:hover .delete-btn {
+            opacity: 1;
+        }
+
         .empty-state {
             text-align: center;
             padding: 30px 15px;
@@ -530,7 +553,8 @@
             cacheTime: 0,
             lastOrder: null,
             undoTimeout: null,
-            sessionOrders: {}
+            sessionOrders: {},
+            allOrders: {} // Menyimpan semua order dengan ID
         };
 
         // ==================== INITIALIZATION ====================
@@ -593,6 +617,15 @@
                 if (e.target.closest('.undo-btn')) {
                     undoLastOrder();
                 }
+
+                // Delete button in daily report
+                const deleteBtn = e.target.closest('.delete-btn');
+                if (deleteBtn) {
+                    const itemId = deleteBtn.getAttribute('data-id');
+                    const itemName = deleteBtn.getAttribute('data-name');
+                    const itemPrice = parseInt(deleteBtn.getAttribute('data-price'));
+                    deleteItemFromDaily(itemId, itemName, itemPrice);
+                }
             });
 
             // Quantity input
@@ -630,14 +663,21 @@
                 let totalHariIni = 0;
                 const rincian = {};
 
+                // Reset allOrders
+                state.allOrders = {};
+
                 if (data && typeof data === 'object') {
-                    Object.values(data).forEach(item => {
+                    Object.entries(data).forEach(([id, item]) => {
                         if (item && item.tanggal && item.menu && item.harga) {
                             if (new Date(item.tanggal).toDateString() === hariIni) {
                                 totalHariIni += item.harga;
-                                if (!rincian[item.menu]) rincian[item.menu] = { qty: 0, subtotal: 0 };
+                                if (!rincian[item.menu]) rincian[item.menu] = { qty: 0, subtotal: 0, ids: [] };
                                 rincian[item.menu].qty++;
                                 rincian[item.menu].subtotal += item.harga;
+                                rincian[item.menu].ids.push(id);
+
+                                // Simpan ke allOrders untuk keperluan delete
+                                state.allOrders[id] = item;
                             }
                         }
                     });
@@ -750,6 +790,40 @@
             }
         }
 
+        async function deleteItemFromDaily(itemId, itemName, itemPrice) {
+            if (state.isProcessing) return;
+
+            state.isProcessing = true;
+            showStatus(`Menghapus ${itemName}...`);
+
+            try {
+                const FIREBASE_URL = CONFIG.FIREBASE_BASE_URL + "penjualan.json";
+                const res = await fetch(`${FIREBASE_URL.replace('/penjualan.json', '')}/penjualan/${itemId}.json`, {
+                    method: 'DELETE'
+                });
+
+                if (!res.ok) throw new Error(`Firebase error: ${res.status}`);
+
+                showStatus(`✅ Berhasil dihapus: ${itemName}`, 'success');
+                
+                // Invalidate cache
+                state.cachedData = null;
+                await refreshData();
+                
+                // Reload daily report jika sedang ditampilkan
+                if (state.currentTab === 'daily') {
+                    await loadDaily();
+                }
+
+                setTimeout(() => clearStatus(), 2000);
+            } catch (e) {
+                console.error("Delete error:", e);
+                showStatus("❌ Gagal hapus", 'danger');
+            } finally {
+                state.isProcessing = false;
+            }
+        }
+
         // ==================== REPORTING ====================
         async function loadDaily() {
             const content = document.getElementById('dailyContent');
@@ -765,9 +839,20 @@
             let html = '<table class="table"><tbody>';
             Object.keys(rincian).sort().forEach(k => {
                 const item = rincian[k];
-                html += `<tr><td>${k}</td><td class="text-center">${item.qty}x</td><td class="text-end fw-bold">Rp ${(item.subtotal/1000).toLocaleString('id-ID')}k</td></tr>`;
+                const firstId = item.ids[0]; // Ambil ID pertama untuk referensi
+                const menuItem = CONFIG.MENU_ITEMS.find(m => m.name === k);
+                const price = menuItem ? menuItem.price : 0;
+
+                html += `<tr>
+                    <td>${k}</td>
+                    <td class="text-center">${item.qty}x</td>
+                    <td class="text-end fw-bold">Rp ${(item.subtotal/1000).toLocaleString('id-ID')}k</td>
+                    <td class="text-end">
+                        <button class="delete-btn" data-id="${firstId}" data-name="${k}" data-price="${price}" title="Hapus satu item">🗑️</button>
+                    </td>
+                </tr>`;
             });
-            html += `</tbody><tfoot><tr><td colspan="2">TOTAL</td><td class="text-end fw-bold text-success">Rp ${totalHariIni.toLocaleString('id-ID')}</td></tr></tfoot></table>`;
+            html += `</tbody><tfoot><tr><td colspan="3">TOTAL</td><td class="text-end fw-bold text-success">Rp ${totalHariIni.toLocaleString('id-ID')}</td></tr></tfoot></table>`;
             content.innerHTML = html;
         }
 
